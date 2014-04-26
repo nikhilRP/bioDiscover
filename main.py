@@ -28,8 +28,10 @@ def search_monarch(disease_ids):
                             gene['gene']['ensembl_id'] = []
                             for i in ref['id']:
                                 gene['gene']['ensembl_id'].append(i)
+                    del(gene['regerences'])
             del(disease['@context'])
             del(disease['sim'])
+            del(disease['pathway_associations'])
             diseases.append(disease)
         except:
             pass
