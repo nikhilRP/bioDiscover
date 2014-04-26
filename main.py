@@ -3,7 +3,7 @@ import requests
 
 HEADERS = {'accept': 'application/json'}
 MONARCH_PHENOTYPE_URL = "http://monarchinitiative.org/phenotype/"
-MONARCH_GENEOTYPE_URL = "http://monarchinitiative.org/geneotype/"
+MONARCH_GENEOTYPE_URL = "http://monarchinitiative.org/genotype/"
 
 
 def search_monarch(term_type, term):
@@ -28,8 +28,7 @@ def main():
     args = parser.parse_args()
     term_type = args.term_type
     term = args.term_name
-
-    return search_monarch(term_type, term)
+    results = search_monarch(term_type, term)
 
 
 if __name__ == main():
