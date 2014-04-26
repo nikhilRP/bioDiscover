@@ -1,0 +1,5 @@
+SELECT DISTINCT * WHERE {   
+   ?datanode1 dc:identifier <http://identifiers.org/ensembl/ENSG00000164305> .
+   ?datanode1 gpml:graphid ?dn1GraphId .
+   ?datanode1 a gpml:DataNode .
+   ?datanode1 dcterms:isPartOf ?pathway .}
