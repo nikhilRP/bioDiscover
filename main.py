@@ -3,7 +3,7 @@ import requests
 
 HEADERS = {'accept': 'application/json'}
 MONARCH_PHENOTYPE_URL = "http://monarchinitiative.org/phenotype/"
-MONARCH_GENEOTYPE_URL = "http://monarchinitiative.org/genotype/"
+MONARCH_GENEOTYPE_URL = "http://monarchinitiative.org/geneotype/"
 
 
 def search_monarch(term_type, term):
@@ -23,12 +23,13 @@ def main():
         description="Search multiple databases using this module",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--term-type', help="Item type")
-    parser.add_argument('--term-name', help="Search term")
+    parser.add_argument('--term-type', help="Item type (gene or phenotype)") 
+    parser.add_argument('--term-name', help="Search term (e.g: abnormal cerebellum morphology or  ALDH1A2)")
     args = parser.parse_args()
     term_type = args.term_type
     term = args.term_name
-    results = search_monarch(term_type, term)
+
+    return search_monarch(term_type, term)
 
 
 if __name__ == main():
