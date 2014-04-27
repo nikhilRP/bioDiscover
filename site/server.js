@@ -104,7 +104,6 @@ app.get('/query/', function(req, res) {
   var input = ['OMIM_127750',  'OMIM_105830'];
   var updatedDiseases = [];
 
-
   function convertDisease(disease, callbackDiseaseConverter) {
     console.log('disease');
     console.log(disease);
@@ -121,14 +120,13 @@ app.get('/query/', function(req, res) {
       updatedDiseases.push(disease);
       callbackGeneAssociation(null, disease);
     }, function(err, disease){
-      updatedDiseases.push(disease);
+      //updatedDiseases.push(disease);
       callbackDiseaseConverter(null, updatedDiseases);
       // if any of the saves produced an error, err would equal that error
     });
   }
 
   getMonarchObjectArray(input, function(diseases) {
-
     async.each(diseases, convertDisease, function(err){
       console.log('updatedDiseases');
       console.log(updatedDiseases);
