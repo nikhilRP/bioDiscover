@@ -43,9 +43,9 @@ function getMonarchObject(input, callbackOutside) {
     response.on('data', function (chunk) {
       str += chunk;
     });
-    response.on('end', function () {
+    response.on('end', function (data) {
       if (!!err) callbackOutside(err);
-      callbackOutside(null, 'result');
+      callbackOutside(null, data);
     });
   };
 
@@ -56,8 +56,11 @@ function getMonarchObject(input, callbackOutside) {
 // input : array of disease ids
 function getMonarchObjectArray(input, callbackOutside) {
   var monarchObjectArray = [];
-  async.eachSeries(input, getMonarchObject, function(err, monarchObject) {
+  async.eachSeries(input, function(err, monarchObject) {
     monarchObjectArray.push(monarchObject);
+  },
+  function() {
+    callbackOutside(monarchObjectArray);
   });
 }
 
@@ -101,9 +104,9 @@ var client = new elasticsearch.Client({
 
 
 app.get('/query/', function(req, res) {
-  var input = 'OMIM_127750';
-  getMonarchObject(input, function(disease) {
-    res.json(disease);
+  var input = ['OMIM_127750',  'OMIM_105830'];
+  getMonarchObjectArray(input, function(disease) {
+    console.log(res.json(disease));
   });
 
   getDrugs(input, function(results) {
