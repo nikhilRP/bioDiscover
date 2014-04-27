@@ -4,6 +4,7 @@ var util = require('util'),
     http = require('http'),
     fs = require('fs'),
     url = require('url'),
+    http = require('http'),
     events = require('events');
 
 var DEFAULT_PORT = 3333;
@@ -26,6 +27,33 @@ function createServlet(Class) {
   var servlet = new Class();
   return servlet.handleRequest.bind(servlet);
 }
+
+
+function getPathway(input, callback) {
+  var options = {
+    host: 'www.wikipathways.org',
+    path: '/wpi/wpi.php?action=downloadFile&type=gpml&pwTitle=Pathway:' + input,
+    port: '80',
+    //This is the only line that is new. `headers` is an object with the headers to request
+    headers: {'custom': 'Custom Header Demo works'}
+  };
+
+  callback = function(response) {
+    var str = '';
+    response.on('data', function (chunk) {
+      str += chunk;
+    });
+
+    response.on('end', function () {
+      console.log(str);
+      callback('result');
+    });
+  };
+}
+
+  getPathway('pathwayId', function(pvjson) {
+    // do something
+  });
 
 /**
  * An Http server implementation that uses a map of methods to decide
