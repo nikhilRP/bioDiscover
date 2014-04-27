@@ -3,6 +3,14 @@ nobProject
 
 nob_project
 
+Dependencies:
+    ElasticSearch
+    Python 2.7
+    Pyelasticsearch
+    Node
+    npm
+    express
+
 OMIM to Ensembl via BridgeDB: http://webservice.bridgedb.org/Human/xrefs/Om/603903
 
 The rest of the keys for BridgeDB: http://svn.bigcat.unimaas.nl/bridgedb/trunk/org.bridgedb.bio/resources/org/bridgedb/bio/datasources.txt
