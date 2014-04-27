@@ -6,6 +6,7 @@ var util = require('util'),
     url = require('url'),
     http = require('http'),
     events = require('events'),
+    async = require('async'),
     elasticsearch = require('elasticsearch'),
     express = require('express');
 
@@ -19,6 +20,7 @@ function escapeHtml(value) {
     replace('"', '&quot;');
 }
 
+// input : disease id string
 function getMonarchObject(input, callbackOutside) {
   
   var sub_String = input.substring(0,4);
@@ -42,13 +44,23 @@ function getMonarchObject(input, callbackOutside) {
       str += chunk;
     });
     response.on('end', function () {
-      callbackOutside('result');
+      if (!!err) callbackOutside(err);
+      callbackOutside(null, 'result');
     });
   };
 
   var req = http.request(options, callback);
   req.end();
 }
+
+// input : array of disease ids
+function getMonarchObjectArray(input, callbackOutside) {
+  var monarchObjectArray = [];
+  async.eachSeries(input, getMonarchObject, function(err, monarchObject) {
+    monarchObjectArray.push(monarchObject);
+  });
+}
+
 
 //input : geneid
 //output is array of json docs
