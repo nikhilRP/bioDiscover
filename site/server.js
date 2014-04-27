@@ -55,25 +55,52 @@ function getMonarchObjectArray(input, callbackOutside) {
         console.log(str);
 
         monarchObjectArray.push(str);
-        callbackOutside(str);
-      });
-    };
 
-    var req = http.request(options, callback);
-    req.end();
-  }
+// input : array of disease ids
+function getMonarchObjectArray(input, callbackOutside) {
 
-  console.log('getMonarchObjectArray input');
-  console.log(input);
-  async.eachSeries(input, getMonarchObject, function(monarchObject) {
+  var monarchObjectArray = [];
+  // input : disease id string
+  function getMonarchObject(input, callbackOutside) {
+    console.log('getMonarchObject input');
+    console.log(input);
+    
+    var sub_String = input.substring(0,4);
+    var path = '';
+    
   });
 }
 
 
 //input : geneid
 //output is array of json docs
-function getESObject(input, callback) {
+function getDrugs(input, callback) {
 
+  input = 'ENSG00000133488';
+  // querying for drugs
+  client.search({
+    index: 'app',
+    type: 'drugs',
+    q: 'genes:' + input
+  }, function (error, response) {
+    response = response['hits']['hits'];
+    callback(response);
+  });
+
+}
+
+//input : geneid
+function getPathways(input, callback) {
+
+  input = 'ENSMUSG00000021518';
+  client.search({
+    index: 'app',
+    type: 'wikipathways',
+    q: 'genes:' + input
+  }, function (error, response) {
+    response = response['hits']['hits'];
+    callback(response);
+  });
 }
 
 // Elasticsearch client
@@ -84,10 +111,19 @@ var client = new elasticsearch.Client({
 
 
 app.get('/query/', function(req, res) {
-  var input = ['OMIM_127750', 'OMIM_105830'];
+  var input = ['OMIM_127750',  'OMIM_105830'];
   getMonarchObjectArray(input, function(disease) {
-    res.json(disease);
+    console.log(res.json(disease));
   });
+
+  getDrugs(input, function(results) {
+    console.log(results);
+  });
+
+  getPathways(input, function(results) {
+    console.log(results);
+  });
+
 });
 
 var server = app.listen(3333, function() {
