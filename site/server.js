@@ -20,44 +20,52 @@ function escapeHtml(value) {
     replace('"', '&quot;');
 }
 
-// input : disease id string
-function getMonarchObject(input, callbackOutside) {
-  
-  var sub_String = input.substring(0,4);
-  var path = '';
-  
-  if(sub_String.toLowerCase() == 'omim') {
-    path = '/disease/' + input + '.json';
-  } else {
-    path = '/gene/' + input + '.json';
-  }
-
-  var options = {
-    host: 'www.monarchinitiative.org',
-    path: path,
-    port: '80',
-    headers: {'accept': 'application/json'}
-  };
-  callback = function(response) {
-    var str = '';
-    response.on('data', function (chunk) {
-      str += chunk;
-    });
-    response.on('end', function () {
-      if (!!err) callbackOutside(err);
-      callbackOutside(null, 'result');
-    });
-  };
-
-  var req = http.request(options, callback);
-  req.end();
-}
 
 // input : array of disease ids
 function getMonarchObjectArray(input, callbackOutside) {
+
   var monarchObjectArray = [];
-  async.eachSeries(input, getMonarchObject, function(err, monarchObject) {
-    monarchObjectArray.push(monarchObject);
+  // input : disease id string
+  function getMonarchObject(input, callbackOutside) {
+    console.log('getMonarchObject input');
+    console.log(input);
+    
+    var sub_String = input.substring(0,4);
+    var path = '';
+    
+    if(sub_String.toLowerCase() == 'omim') {
+      path = '/disease/' + input + '.json';
+    } else {
+      path = '/gene/' + input + '.json';
+    }
+
+    var options = {
+      host: 'www.monarchinitiative.org',
+      path: path,
+      port: '80',
+      headers: {'accept': 'application/json'}
+    };
+    callback = function(response) {
+      var str = '';
+      response.on('data', function (chunk) {
+        str += chunk;
+      });
+      response.on('end', function (data) {
+        console.log('data');
+        console.log(str);
+
+        monarchObjectArray.push(str);
+        callbackOutside(str);
+      });
+    };
+
+    var req = http.request(options, callback);
+    req.end();
+  }
+
+  console.log('getMonarchObjectArray input');
+  console.log(input);
+  async.eachSeries(input, getMonarchObject, function(monarchObject) {
   });
 }
 
@@ -77,7 +85,7 @@ var client = new elasticsearch.Client({
 
 app.get('/query/', function(req, res) {
   var input = ['OMIM_127750', 'OMIM_105830'];
-  getMonarchObject(input, function(disease) {
+  getMonarchObjectArray(input, function(disease) {
     res.json(disease);
   });
 });
