@@ -20,47 +20,54 @@ function escapeHtml(value) {
     replace('"', '&quot;');
 }
 
-// input : disease id string
-function getMonarchObject(input, callbackOutside) {
-  
-  var sub_String = input.substring(0,4);
-  var path = '';
-  
-  if(sub_String.toLowerCase() == 'omim') {
-    path = '/disease/' + input + '.json';
-  } else {
-    path = '/gene/' + input + '.json';
-  }
-
-  var options = {
-    host: 'www.monarchinitiative.org',
-    path: path,
-    port: '80',
-    headers: {'accept': 'application/json'}
-  };
-  callback = function(response) {
-    var str = '';
-    response.on('data', function (chunk) {
-      str += chunk;
-    });
-    response.on('end', function (data) {
-      if (!!err) callbackOutside(err);
-      callbackOutside(null, data);
-    });
-  };
-
-  var req = http.request(options, callback);
-  req.end();
-}
 
 // input : array of disease ids
 function getMonarchObjectArray(input, callbackOutside) {
+
   var monarchObjectArray = [];
-  async.eachSeries(input, function(err, monarchObject) {
-    monarchObjectArray.push(monarchObject);
-  },
-  function() {
-    callbackOutside(monarchObjectArray);
+  // input : disease id string
+  function getMonarchObject(input, callbackOutside) {
+    console.log('getMonarchObject input');
+    console.log(input);
+    
+    var sub_String = input.substring(0,4);
+    var path = '';
+    
+    if(sub_String.toLowerCase() == 'omim') {
+      path = '/disease/' + input + '.json';
+    } else {
+      path = '/gene/' + input + '.json';
+    }
+
+    var options = {
+      host: 'www.monarchinitiative.org',
+      path: path,
+      port: '80',
+      headers: {'accept': 'application/json'}
+    };
+    callback = function(response) {
+      var str = '';
+      response.on('data', function (chunk) {
+        str += chunk;
+      });
+      response.on('end', function (data) {
+        console.log('data');
+        console.log(str);
+
+        monarchObjectArray.push(str);
+
+// input : array of disease ids
+function getMonarchObjectArray(input, callbackOutside) {
+
+  var monarchObjectArray = [];
+  // input : disease id string
+  function getMonarchObject(input, callbackOutside) {
+    console.log('getMonarchObject input');
+    console.log(input);
+    
+    var sub_String = input.substring(0,4);
+    var path = '';
+    
   });
 }
 
