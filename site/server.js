@@ -52,8 +52,33 @@ function getMonarchObject(input, callbackOutside) {
 
 //input : geneid
 //output is array of json docs
-function getESObject(input, callback) {
+function getDrugs(input, callback) {
 
+  input = 'ENSG00000133488';
+  // querying for drugs
+  client.search({
+    index: 'app',
+    type: 'drugs',
+    q: 'genes:' + input
+  }, function (error, response) {
+    response = response['hits']['hits'];
+    callback(response);
+  });
+
+}
+
+//input : geneid
+function getPathways(input, callback) {
+
+  input = 'ENSMUSG00000021518';
+  client.search({
+    index: 'app',
+    type: 'wikipathways',
+    q: 'genes:' + input
+  }, function (error, response) {
+    response = response['hits']['hits'];
+    callback(response);
+  });
 }
 
 // Elasticsearch client
@@ -64,10 +89,19 @@ var client = new elasticsearch.Client({
 
 
 app.get('/query/', function(req, res) {
-  var input = ['OMIM_127750', 'OMIM_105830'];
+  var input = 'OMIM_127750';
   getMonarchObject(input, function(disease) {
     res.json(disease);
   });
+
+  getDrugs(input, function(results) {
+    console.log(results);
+  });
+
+  getPathways(input, function(results) {
+    console.log(results);
+  });
+
 });
 
 var server = app.listen(3333, function() {
