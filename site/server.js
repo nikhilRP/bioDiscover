@@ -26,10 +26,7 @@ function getMonarchObjectArray(input, callbackOutside) {
 
   var monarchObjectArray = [];
   // input : disease id string
-  function getMonarchObject(input, callbackOutside) {
-    console.log('getMonarchObject input');
-    console.log(input);
-    
+  function getMonarchObject(input, callbackEach) {
     var sub_String = input.substring(0,4);
     var path = '';
     
@@ -51,23 +48,17 @@ function getMonarchObjectArray(input, callbackOutside) {
         str += chunk;
       });
       response.on('end', function (data) {
-        console.log('data');
-        console.log(str);
+        var monarchObjectJson = JSON.parse(str);
+        monarchObjectArray.push(monarchObjectJson);
+        callbackEach(monarchObjectJson);
+      });
+    };
 
-        monarchObjectArray.push(str);
-
-// input : array of disease ids
-function getMonarchObjectArray(input, callbackOutside) {
-
-  var monarchObjectArray = [];
-  // input : disease id string
-  function getMonarchObject(input, callbackOutside) {
-    console.log('getMonarchObject input');
-    console.log(input);
-    
-    var sub_String = input.substring(0,4);
-    var path = '';
-    
+    var req = http.request(options, callback);
+    req.end();
+  }
+  async.eachSeries(input, getMonarchObject, function(monarchObject) {
+    callbackOutside(monarchObjectArray);
   });
 }
 
@@ -105,15 +96,18 @@ function getPathways(input, callback) {
 
 // Elasticsearch client
 var client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
+  host: 'localhost:9200'
 });
 
 
 app.get('/query/', function(req, res) {
   var input = ['OMIM_127750',  'OMIM_105830'];
-  getMonarchObjectArray(input, function(disease) {
-    console.log(res.json(disease));
+  var genes_associations = [];
+  getMonarchObjectArray(input, function(diseases) {
+    diseases.forEach(
+      function(disease) {
+        gene_associations = disease['gene_associations'];
+      });
   });
 
   getDrugs(input, function(results) {
