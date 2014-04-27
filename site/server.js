@@ -5,7 +5,8 @@ var util = require('util'),
     fs = require('fs'),
     url = require('url'),
     http = require('http'),
-    events = require('events');
+    events = require('events'),
+    elasticsearch = require('elasticsearch');
 
 var DEFAULT_PORT = 3333;
 
