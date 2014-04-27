@@ -50,26 +50,20 @@ function getMonarchObject(input, callbackOutside) {
   req.end();
 }
 
+//input : geneid
+//output is array of json docs
+function getESObject(input, callback) {
+
+}
+
 // Elasticsearch client
 var client = new elasticsearch.Client({
   host: 'localhost:9200',
   log: 'trace'
 });
 
+
 app.get('/query/', function(req, res) {
-
-  client.ping({
-    requestTimeout: 1000,
-  }, function (error) {
-    if (error) {
-      console.error('elasticsearch cluster is down!');
-    } else {
-      console.log('All is well');
-    }
-  });
-});
-
-app.get('/queryMonarch/', function(req, res) {
   var input = ['OMIM_127750', 'OMIM_105830'];
   getMonarchObject(input, function(disease) {
     res.json(disease);
