@@ -120,7 +120,7 @@ app.get('/query/', function(req, res) {
       updatedDiseases.push(disease);
       callbackGeneAssociation(null, disease);
     }, function(err, disease){
-      //updatedDiseases.push(disease);
+      updatedDiseases.push(disease);
       callbackDiseaseConverter(null, updatedDiseases);
       // if any of the saves produced an error, err would equal that error
     });
@@ -128,11 +128,7 @@ app.get('/query/', function(req, res) {
 
   getMonarchObjectArray(input, function(diseases) {
     async.each(diseases, convertDisease, function(err){
-      console.log('updatedDiseases');
-      console.log(updatedDiseases);
-      // if any of the saves produced an error, err would equal that error
     });
-
   });
 
   /*

@@ -20,52 +20,13 @@ function escapeHtml(value) {
     replace('"', '&quot;');
 }
 
-<<<<<<< HEAD
-=======
-// input : disease id string
-function getMonarchObject(input, callbackOutside) {
-  
-  var sub_String = input.substring(0,4);
-  var path = '';
-  
-  if(sub_String.toLowerCase() == 'omim') {
-    path = '/disease/' + input + '.json';
-  } else {
-    path = '/gene/' + input + '.json';
-  }
-
-  var options = {
-    host: 'www.monarchinitiative.org',
-    path: path,
-    port: '80',
-    headers: {'accept': 'application/json'}
-  };
-  callback = function(response) {
-    var str = '';
-    response.on('data', function (chunk) {
-      str += chunk;
-    });
-    response.on('end', function (data) {
-      if (!!err) callbackOutside(err);
-      callbackOutside(null, data);
-    });
-  };
-
-  var req = http.request(options, callback);
-  req.end();
-}
->>>>>>> c218d170e4f61e4e310245d45fd33901ea18ca30
 
 // input : array of disease ids
 function getMonarchObjectArray(input, callbackOutside) {
 
   var monarchObjectArray = [];
-<<<<<<< HEAD
   // input : disease id string
-  function getMonarchObject(input, callbackOutside) {
-    console.log('getMonarchObject input');
-    console.log(input);
-    
+  function getMonarchObject(input, callbackEach) {
     var sub_String = input.substring(0,4);
     var path = '';
     
@@ -87,28 +48,17 @@ function getMonarchObjectArray(input, callbackOutside) {
         str += chunk;
       });
       response.on('end', function (data) {
-        console.log('data');
-        console.log(str);
-
-        monarchObjectArray.push(str);
-        callbackOutside(str);
+        var monarchObjectJson = JSON.parse(str);
+        monarchObjectArray.push(monarchObjectJson);
+        callbackEach(monarchObjectJson);
       });
     };
 
     var req = http.request(options, callback);
     req.end();
   }
-
-  console.log('getMonarchObjectArray input');
-  console.log(input);
   async.eachSeries(input, getMonarchObject, function(monarchObject) {
-=======
-  async.eachSeries(input, function(err, monarchObject) {
-    monarchObjectArray.push(monarchObject);
-  },
-  function() {
     callbackOutside(monarchObjectArray);
->>>>>>> c218d170e4f61e4e310245d45fd33901ea18ca30
   });
 }
 
@@ -146,30 +96,53 @@ function getPathways(input, callback) {
 
 // Elasticsearch client
 var client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
+  host: 'localhost:9200'
 });
 
 
 app.get('/query/', function(req, res) {
-<<<<<<< HEAD
-  var input = ['OMIM_127750', 'OMIM_105830'];
-  getMonarchObjectArray(input, function(disease) {
-    res.json(disease);
-=======
   var input = ['OMIM_127750',  'OMIM_105830'];
-  getMonarchObjectArray(input, function(disease) {
-    console.log(res.json(disease));
+  
+  var updatedDiseases = [];
+
+  function convertDisease(disease, callbackDiseaseConverter) {
+    console.log('disease');
+    console.log(disease);
+    var gene_associations = disease['gene_associations'];
+    disease.genes = [];
+    async.each(gene_associations, function(gene_association, callbackGeneAssociation) {
+      //console.log('gene_association');
+      //console.log(gene_association);
+      var geneId = gene_association.gene.id;
+      console.log('geneId');
+      console.log(geneId);
+      disease.genes.push(geneId.replace(':', '_'));
+      //disease.genes.push(geneId);
+      updatedDiseases.push(disease);
+      callbackGeneAssociation(null, disease);
+    }, function(err, disease){
+<<<<<<< HEAD
+      //updatedDiseases.push(disease);
+=======
+>>>>>>> 3814c9143529e5d2b138b6c3f623b373f1bc352d
+      callbackDiseaseConverter(null, updatedDiseases);
+      // if any of the saves produced an error, err would equal that error
+    });
+  }
+
+  getMonarchObjectArray(input, function(diseases) {
+    async.each(diseases, convertDisease, function(err){
+    });
   });
 
   getDrugs(input, function(results) {
     console.log(results);
->>>>>>> c218d170e4f61e4e310245d45fd33901ea18ca30
   });
 
   getPathways(input, function(results) {
     console.log(results);
   });
+  
 
 });
 
