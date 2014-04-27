@@ -19,10 +19,20 @@ function escapeHtml(value) {
     replace('"', '&quot;');
 }
 
-function getPathway(input, callbackOutside) {
+function getMonarchObject(input, callbackOutside) {
+  
+  var sub_String = input.substring(0,4);
+  var path = '';
+  
+  if(sub_String.toLowerCase() == 'omim') {
+    path = '/disease/' + input + '.json';
+  } else {
+    path = '/gene/' + input + '.json';
+  }
+
   var options = {
     host: 'www.monarchinitiative.org',
-    path: '/disease/' + input + '.json',
+    path: path,
     port: '80',
     headers: {'accept': 'application/json'}
   };
@@ -60,10 +70,9 @@ app.get('/query/', function(req, res) {
 });
 
 app.get('/queryMonarch/', function(req, res) {
-  var input = 'OMIM_127750';
-  getPathway(input, function(disease) {
+  var input = ['OMIM_127750', 'OMIM_105830'];
+  getMonarchObject(input, function(disease) {
     res.json(disease);
-    console.log(res);
   });
 });
 
