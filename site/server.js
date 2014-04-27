@@ -33,7 +33,7 @@ function getMonarchObjectArray(input, callbackOutside) {
     if(sub_String.toLowerCase() == 'omim') {
       path = '/disease/' + input + '.json';
     } else {
-      path = '/gene/' + input + '.json';
+      path = '/gene/' + input + '/references.json';
     }
 
     var options = {
