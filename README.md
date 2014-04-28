@@ -1,16 +1,7 @@
-nobProject
+bioDiscover
 ==========
 
 nob_project
-
-Dependencies:
-    ElasticSearch
-    Python 2.7
-    Pyelasticsearch
-    Node
-    npm
-    express
-    Monarch REST API
 
 OMIM to Ensembl via BridgeDB: http://webservice.bridgedb.org/Human/xrefs/Om/603903
 
