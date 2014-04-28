@@ -19,8 +19,6 @@ function escapeHtml(value) {
     replace('>', '&gt;').
     replace('"', '&quot;');
 }
-
-
 // input : array of disease ids
 function getMonarchObjectArray(input, callbackOutside) {
 
@@ -62,6 +60,8 @@ function getMonarchObjectArray(input, callbackOutside) {
   });
 }
 
+// input : array of disease ids
+
 
 //input : geneid
 //output is array of json docs
@@ -100,36 +100,162 @@ var client = new elasticsearch.Client({
 });
 
 
+
 app.get('/query/', function(req, res) {
   var input = ['OMIM_127750',  'OMIM_105830'];
-  var updatedDiseases = [];
 
-  function convertDisease(disease, callbackDiseaseConverter) {
-    console.log('disease');
-    console.log(disease);
-    var gene_associations = disease['gene_associations'];
-    disease.genes = [];
-    async.each(gene_associations, function(gene_association, callbackGeneAssociation) {
-      //console.log('gene_association');
-      //console.log(gene_association);
-      var geneId = gene_association.gene.id;
-      console.log('geneId');
-      console.log(geneId);
-      disease.genes.push(geneId.replace(':', '_'));
-      //disease.genes.push(geneId);
-      updatedDiseases.push(disease);
-      callbackGeneAssociation(null, disease);
-    }, function(err, disease){
-      updatedDiseases.push(disease);
-      callbackDiseaseConverter(null, updatedDiseases);
-      // if any of the saves produced an error, err would equal that error
-    });
-  }
+  async.waterfall([
+      function(callback){
+          getMonarchObjectArray(input, function(diseases) {
 
-  getMonarchObjectArray(input, function(diseases) {
-    async.each(diseases, convertDisease, function(err){
-    });
+
+
+
+            var updatedDiseases = [];
+            function convertDisease(diseaseToConvert, callbackDiseaseConverter) {
+              console.log('diseaseToConvert');
+              console.log(diseaseToConvert);
+              var gene_associations = diseaseToConvert['gene_associations'];
+              diseaseToConvert.genes = [];
+              var genes = [];
+              async.each(gene_associations, function(gene_association, callbackGeneAssociation) {
+                //console.log('gene_association');
+                //console.log(gene_association);
+                var geneId = gene_association.gene.id;
+                console.log('geneId');
+                console.log(geneId);
+                diseaseToConvert.genes.push(geneId.replace(':', '_'));
+                //console.log('diseaseToConvert');
+                //console.log(diseaseToConvert.toString());
+                //console.log(diseaseToConvert);
+                //disease.genes.push(geneId);
+                //updatedDiseases.push(disease);
+                callbackGeneAssociation(null);
+              }, function(err){
+                console.log('err');
+                console.log(err);
+                console.log('updatedDiseases');
+                console.log(updatedDiseases);
+                console.log(updatedDiseases.toString());
+                updatedDiseases.push(diseaseToConvert);
+                callbackDiseaseConverter(null, updatedDiseases);
+                // if any of the saves produced an error, err would equal that error
+              });
+            }
+
+
+
+
+
+
+            async.each(diseases, convertDisease, function(err){
+              console.log('updatedDiseases');
+              console.log(updatedDiseases);
+              callback(null, updatedDiseases);
+            });
+          });
+      },
+      function(diseases, callback){
+
+        var allGenes = [];
+        function getAllGenes(updatedDisease, callbackGenes) {
+          if (!!updatedDisease && !!updatedDisease.genes) {
+            allGenes = allGenes.concat(updatedDisease.genes);
+            callbackGenes(null, allGenes);
+          }
+          else {
+            callbackGenes(null, allGenes);
+          }
+        }
+
+
+
+        async.each(diseases, getAllGenes, function(err){
+          callback(null, allGenes);
+        });
+      },
+      function(allGenes, callback){
+
+
+        var updatedMonarchObjectArray = [];
+          function getMonarchObjectArrayUpdated(input, callbackOutside) {
+            console.log('input2');
+            console.log(input);
+            var monarchObjectArray = [];
+            // input : disease id string
+            function getMonarchObjectUpdated(input, callbackEach) {
+              var sub_String = input.substring(0,4);
+              var path = '';
+              
+              if(sub_String.toLowerCase() == 'omim') {
+                path = '/disease/' + input + '.json';
+              } else {
+                path = '/gene/' + input + '.json';
+              }
+
+              var options = {
+                host: 'www.monarchinitiative.org',
+                path: path,
+                port: '80'
+                //headers: {'accept': 'application/json'}
+              };
+              callback = function(response) {
+                var str = '';
+                response.on('data', function (chunk) {
+                  str += chunk;
+                });
+                response.on('end', function (data) {
+                  //console.log('str');
+                  //console.log(str);
+                  var firstCharacter = str.substring(0,1);
+                  if(firstCharacter !== '<') {
+                    var monarchObjectJson = JSON.parse(str);
+                    if(sub_String.toLowerCase() == 'omim') {
+                      callbackEach();
+                    } else {
+                      console.log('monarchObjectJson');
+                      console.log(monarchObjectJson);
+                      var references = monarchObjectJson.references;
+                      if (!!references) {
+                        monarchObjectArray.push(references);
+                        callbackEach();
+                      }
+                      else {
+                        callbackEach();
+                      }
+                    }
+                  }
+                  else {
+                    callbackEach();
+                  }
+                });
+              };
+
+              var req = http.request(options, callback);
+              req.end();
+            }
+            async.eachSeries(input, getMonarchObjectUpdated, function() {
+              console.log('monarchObjectArray');
+              console.log(monarchObjectArray);
+              updatedMonarchObjectArray = updatedMonarchObjectArray.concat(monarchObjectArray);
+              callbackOutside(monarchObjectArray);
+            });
+          }
+
+          async.each(allGenes, getMonarchObjectArrayUpdated, function(err){
+            callback(null, updatedMonarchObjectArray);
+            //callback(null, updatedMonarchObjectArray);
+          });
+          // arg1 now equals 'three'
+      }
+  ], function (err, result) {
+            console.log('result');
+            console.log(result);
+     // result now equals 'done'    
   });
+
+
+
 
   /*
   getDrugs(input, function(results) {
